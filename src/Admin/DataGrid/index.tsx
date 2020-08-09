@@ -6,7 +6,6 @@ import { useCollection } from 'react-firebase-hooks/firestore';
 
 import { createActivity, activitiesCollection, updateActivity } from '../../apiHelpers';
 
-import passThroughEditor from './PassThroughEditor';
 import NameFormatter from './NameCell';
 import AzureImageSearch, { Editor as AzureImageSearchEditor } from './AzureImageSearch';
 import Checkbox from './Checkbox';

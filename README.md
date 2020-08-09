@@ -1,1 +1,1 @@
-# activity-brainstorm
+# Activity Brainstorm

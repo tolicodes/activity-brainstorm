@@ -1,19 +1,18 @@
 import React, { useState } from 'react';
-import useAxios from 'axios-hooks'
+import axios from 'axios';
 import styled from 'styled-components';
 import { updateActivity } from '../../apiHelpers';
-import { truncateSync } from 'fs';
 
 const ROW_HEIGHT = 100;
 
 interface IProps {
-  onCommit: (image: string) => void
+  onCommit: (imageUrl: string) => void
   row: any
   column: any
 }
 
 interface IState {
-  image: string;
+  imageUrl: string;
   editorRef: any
 }
 
@@ -27,27 +26,34 @@ const SuggestedImage = styled('img')`
 
 let lastSuggestionsRequest: Date;
 
-export const AzureImageFormatter = ({ row, column: { key }, onCommit, prioritizeSuggestions }: any) => {
+export const AzureImageFormatter = ({ row, onCommit, prioritizeSuggestions }: any) => {
   const [suggestionsMode, setSuggestionsMode] = useState(false);
-  const image = row[key];
-  const thumbnailUrl = row.thumbnailUrl;
+  const [uploading, setUploading] = useState(false);
+  const [suggestedImagesLoading, setSuggestedImagesLoading] = useState(false);
+
+  const [suggestedImages, setSuggestedImages] = useState([]);
+
+  const { thumbnailUrl, imageUrl } = row;
 
   const isRateLimited = () => !prioritizeSuggestions && (+new Date() - +lastSuggestionsRequest < 200);
 
-  const [{ data: suggestedImages, loading: suggestionsLoading }, loadSuggestions] = useAxios(`${process.env.REACT_APP_API_BASE}imageSearch?search=${row.name}`, {
-    manual: true
-  });
+  const loadSuggestions = async () => {
+    setSuggestedImagesLoading(true);
+    setSuggestedImages((await axios.get(`${process.env.REACT_APP_API_BASE}imageSearch?search=${row.name}`)).data);
+    setSuggestedImagesLoading(false);
+  }
 
   const loadSuggestionsWrap = () => {
-    if (isRateLimited() || suggestionsLoading) return;
+    if (isRateLimited() || suggestedImagesLoading) return;
 
     lastSuggestionsRequest = new Date();
     loadSuggestions();
-    setSuggestionsMode(true);
   }
 
   // don't load if we have an image or if it's a blank row
-  if (row.name && !suggestionsMode && !image) {
+  if (row.name && !suggestionsMode && !imageUrl) {
+    setSuggestionsMode(true);
+
     if (isRateLimited()) {
       setTimeout(loadSuggestionsWrap, 1000);
     } else {
@@ -55,72 +61,46 @@ export const AzureImageFormatter = ({ row, column: { key }, onCommit, prioritize
     }
   }
 
-  const [{ data: uploadImageData, loading: uploadLoading }, uploadImage] = useAxios({
-    url: `${process.env.REACT_APP_API_BASE}saveImage`,
-    method: 'PUT'
-  }, {
-    manual: true,
-  });
+  const uploadImage = async ({ imageUrl, thumbnailImageUrl }: any) => {
+    setUploading(true);
+    setSuggestionsMode(false);
 
-  const [{ data: uploadThumbnailImageData, loading: uploadThumbnailLoading }, uploadThumbnailImage] = useAxios({
-    url: `${process.env.REACT_APP_API_BASE}saveImage`,
-    method: 'PUT'
-  }, {
-    manual: true,
-  });
-
-  const uploadedImageUrl = uploadImageData && uploadImageData.url;
-  const uploadedThumbnailImageUrl = uploadThumbnailImageData && uploadThumbnailImageData.url;
-
-  if (uploadedImageUrl) {
-    updateActivity(row.doc, {
-      image: uploadedImageUrl
-    }).then(() => {
-      onCommit && onCommit(uploadedImageUrl);
+    const { data: { url: uploadedImageUrl } } = await axios.put(`${process.env.REACT_APP_API_BASE}saveImage`, {
+      imageUrl,
     });
-  }
 
-  if (uploadedThumbnailImageUrl) {
-    updateActivity(row.doc, {
+    const { data: { url: uploadedThumbnailImageUrl } } = await axios.put(`${process.env.REACT_APP_API_BASE}saveImage`, {
+      imageUrl: thumbnailImageUrl,
+    });
+
+    await updateActivity(row.doc, {
+      imageUrl: uploadedImageUrl,
       thumbnailUrl: uploadedThumbnailImageUrl
     });
+
+    onCommit && onCommit(uploadedImageUrl);
+
+    setUploading(false);
   }
 
-  const setImage = async (thumbnailUrl: string, contentUrl: string) => {
-    uploadImage({
-      data: {
-        imageUrl: contentUrl
-      }
-    });
-
-    uploadThumbnailImage({
-      data: {
-        imageUrl: thumbnailUrl
-      }
-    });
-
-    setSuggestionsMode(false);
-  };
-
-  const loading = uploadLoading || uploadThumbnailLoading || suggestionsLoading;
-  const smallestImage = thumbnailUrl || image;
+  const loading = uploading || suggestedImagesLoading;
 
   return (
     <div>
       {
-        (!loading && smallestImage && !suggestionsMode) && <img height={ROW_HEIGHT} src={smallestImage} />
+        (!loading && thumbnailUrl && !suggestionsMode) && <img height={ROW_HEIGHT} src={thumbnailUrl} />
       }
       {
         // if we are loading suggestions or we are being rate limited and this isn't a new row
-        (!suggestedImages && !image && row.id) && <div>Loading suggested images...</div>
+        !suggestedImages.length && suggestionsMode && <div>Loading suggested images...</div>
       }
       {
-        (uploadLoading || uploadThumbnailLoading) && <div>Uploading...</div>
+        uploading && <div>Uploading...</div>
       }
       {
-        suggestedImages && !loading && !uploadedImageUrl && (
+        suggestedImages && suggestionsMode && !uploading && (
           <SuggestedImages>{suggestedImages.map(({ thumbnailUrl, contentUrl }: { thumbnailUrl: string, contentUrl: string }) => (
-            <SuggestedImage key={thumbnailUrl} onClick={() => setImage(thumbnailUrl, contentUrl)} src={thumbnailUrl} />
+            <SuggestedImage key={thumbnailUrl} onClick={() => uploadImage({ thumbnailImageUrl: thumbnailUrl, imageUrl: contentUrl })} src={thumbnailUrl} />
           ))}
           </SuggestedImages>)
       }
@@ -131,11 +111,11 @@ export const AzureImageFormatter = ({ row, column: { key }, onCommit, prioritize
 export class AzureImageEditor extends React.Component<IProps, IState> {
   constructor(props: any) {
     super(props);
-    this.state = { image: props.value, editorRef: React.createRef() };
+    this.state = { imageUrl: props.value, editorRef: React.createRef() };
   }
 
   getValue() {
-    return this.state.image;
+    return this.state.imageUrl;
   }
 
   getInputNode() {
@@ -146,7 +126,7 @@ export class AzureImageEditor extends React.Component<IProps, IState> {
   render() {
     const withoutImage = {
       ...this.props.row,
-      image: '',
+      imageUrl: '',
     };
 
     return (

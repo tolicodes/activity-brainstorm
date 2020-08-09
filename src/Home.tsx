@@ -19,11 +19,11 @@ export default () => {
   return (<GridList cellHeight={300} cols={4}>
     {
       activities.docs.map(doc => {
-        const { name, image } = doc.data();
+        const { name, thumbnailUrl } = doc.data();
 
         return (
-          <GridListTile key={image}>
-            <img src={image} alt={name} />
+          <GridListTile key={thumbnailUrl}>
+            <img src={thumbnailUrl} alt={name} />
             <GridListTileBar
               title={name}
               actionIcon={

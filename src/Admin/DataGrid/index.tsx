@@ -42,7 +42,7 @@ export default () => {
 
   const columns = [
     { key: "name", name: "Name", editable: true, formatter: NameFormatter },
-    { key: "image", name: "Image", editor: AzureImageEditor, formatter: AzureImageFormatter, editable: true },
+    { key: "imageUrl", name: "Image", editor: AzureImageEditor, formatter: AzureImageFormatter, editable: true },
     { key: "covidFriendly", name: "COVID Friendly", formatter: Checkbox, editor: Checkbox, editable: true }
   ];
 
@@ -80,7 +80,7 @@ export default () => {
   if (!activityRows.length) return null;
 
   const rows = [
-    { name: '', image: '' },
+    {},
     ...activityRows
   ];
 

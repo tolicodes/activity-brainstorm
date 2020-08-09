@@ -43,7 +43,8 @@ export default () => {
   const columns = [
     { key: "name", name: "Name", editable: true, formatter: NameFormatter },
     { key: "imageUrl", name: "Image", editor: AzureImageEditor, formatter: AzureImageFormatter, editable: true },
-    { key: "covidFriendly", name: "COVID Friendly", formatter: Checkbox, editor: Checkbox, editable: true }
+    { key: "covidFriendly", name: "COVID Friendly", formatter: Checkbox, editor: Checkbox, editable: true },
+    { key: "openNow", name: "Open Now", formatter: Checkbox, editor: Checkbox, editable: true }
   ];
 
   useEffect(() => {

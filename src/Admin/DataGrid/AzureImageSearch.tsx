@@ -2,20 +2,9 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
 import { updateActivity } from '../../apiHelpers';
+import passThroughEditor from './PassThroughEditor'
 
 const ROW_HEIGHT = 100;
-
-interface IProps {
-  onCommit: (imageUrl: string) => void
-  row: any
-  column: any
-}
-
-interface IState {
-  imageUrl: string;
-  editorRef: any
-}
-
 const SuggestedImages = styled('div')`
   display: flex;
 `;
@@ -26,7 +15,7 @@ const SuggestedImage = styled('img')`
 
 let lastSuggestionsRequest: Date;
 
-export const AzureImageFormatter = ({ row, onCommit, prioritizeSuggestions }: any) => {
+const Formatter = ({ row, onCommit, prioritizeSuggestions }: any) => {
   const [suggestionsMode, setSuggestionsMode] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [suggestedImagesLoading, setSuggestedImagesLoading] = useState(false);
@@ -88,7 +77,7 @@ export const AzureImageFormatter = ({ row, onCommit, prioritizeSuggestions }: an
   return (
     <div>
       {
-        (!loading && thumbnailUrl && !suggestionsMode) && <img height={ROW_HEIGHT} src={thumbnailUrl} />
+        (!loading && thumbnailUrl && !suggestionsMode) && <img alt="" height={ROW_HEIGHT} src={thumbnailUrl} />
       }
       {
         // if we are loading suggestions or we are being rate limited and this isn't a new row
@@ -108,29 +97,20 @@ export const AzureImageFormatter = ({ row, onCommit, prioritizeSuggestions }: an
   )
 }
 
-export class AzureImageEditor extends React.Component<IProps, IState> {
-  constructor(props: any) {
-    super(props);
-    this.state = { imageUrl: props.value, editorRef: React.createRef() };
-  }
+export default Formatter;
 
-  getValue() {
-    return this.state.imageUrl;
-  }
+export const Editor = passThroughEditor(Formatter, ({
+  column,
+  row,
+  onCommit
+}: any) => {
+  const withoutImage = {
+    ...row,
+    imageUrl: '',
+  };
 
-  getInputNode() {
-    // @ts-ignore
-    return this.ref;
-  }
+  return (
+    <Formatter row={withoutImage} column={column} onCommit={onCommit} prioritizeSuggestions={true} />
+  );
+})
 
-  render() {
-    const withoutImage = {
-      ...this.props.row,
-      imageUrl: '',
-    };
-
-    return (
-      <AzureImageFormatter row={withoutImage} column={this.props.column} onCommit={this.props.onCommit} prioritizeSuggestions={true} />
-    );
-  }
-}

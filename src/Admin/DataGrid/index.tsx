@@ -6,9 +6,11 @@ import { useCollection } from 'react-firebase-hooks/firestore';
 
 import { createActivity, activitiesCollection, updateActivity } from '../../apiHelpers';
 
+import passThroughEditor from './PassThroughEditor';
 import NameFormatter from './NameCell';
-import { AzureImageEditor, AzureImageFormatter } from './AzureImageSearch';
+import AzureImageSearch, { Editor as AzureImageSearchEditor } from './AzureImageSearch';
 import Checkbox from './Checkbox';
+import GooglePlacesAutocomplete, { Editor as GooglePlacesAutocompleteEditor } from './GooglePlacesAutocomplete';
 
 const ROW_HEIGHT = 100;
 
@@ -42,9 +44,10 @@ export default () => {
 
   const columns = [
     { key: "name", name: "Name", editable: true, formatter: NameFormatter },
-    { key: "imageUrl", name: "Image", editor: AzureImageEditor, formatter: AzureImageFormatter, editable: true },
+    { key: "imageUrl", name: "Image", editor: AzureImageSearchEditor, formatter: AzureImageSearch, editable: true },
     { key: "covidFriendly", name: "COVID Friendly", formatter: Checkbox, editor: Checkbox, editable: true },
-    { key: "openNow", name: "Open Now", formatter: Checkbox, editor: Checkbox, editable: true }
+    { key: "openNow", name: "Open Now", formatter: Checkbox, editor: Checkbox, editable: true },
+    { key: "location", name: "Location", formatter: GooglePlacesAutocomplete, editor: GooglePlacesAutocompleteEditor, editable: true },
   ];
 
   useEffect(() => {
@@ -74,8 +77,10 @@ export default () => {
     });
 
     setPositions(positions);
-    // @ts-ignore
+    // @ts-ignore;
+
     setActivityRows(activityRows)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activities]);
 
   if (!activityRows.length) return null;
@@ -93,6 +98,7 @@ export default () => {
         activities && <ReactDataGrid
           // @ts-ignore
           columns={columns}
+          // @ts-ignore
           rows={rows}
           headerRowHeight={30}
           rowHeight={ROW_HEIGHT}

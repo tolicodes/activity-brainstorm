@@ -59,7 +59,16 @@
     ]
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^5.0.1",
+    "@semantic-release/commit-analyzer": "^8.0.1",
+    "@semantic-release/git": "^9.0.0",
+    "@semantic-release/release-notes-generator": "^9.0.1",
     "@types/google-map-react": "^1.1.8",
-    "@types/load-google-maps-api": "^2.0.1"
+    "@types/load-google-maps-api": "^2.0.1",
+    "cz-conventional-changelog": "^3.2.0",
+    "husky": "^4.2.5",
+    "semantic-release": "^17.1.1",
+    "semantic-release-monorepo": "^7.0.2",
+    "syncpack": "^5.1.4"
   }
 }

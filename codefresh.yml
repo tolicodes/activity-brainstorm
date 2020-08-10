@@ -1,0 +1,20 @@
+version: "1.0"
+stages:
+  - "publish"
+
+steps:
+  publish:
+    title: Publish packages
+    stage: "publish"
+    type: freestyle
+    working_directory: "./activity-brainstorm"
+    arguments:
+      image: "node:latest"
+      commands:
+        - npm i -g firebase-tools
+        - yarn run prepublish
+        - firebase deploy --token "$FIREBASE_KEY"
+    when:
+      branch:
+        only:
+          - master

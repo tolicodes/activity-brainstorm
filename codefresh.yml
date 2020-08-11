@@ -9,6 +9,7 @@ steps:
     stage: "deploy"
     type: freestyle
     working_directory: "${{CF_REPO_NAME}}"
+    fail_fast: true
     arguments:
       image: "node:latest"
       commands:
@@ -17,6 +18,10 @@ steps:
         - pwd
         - ls -la
         # - ls -la node_modules
+    when:
+      condition:
+        all:
+          noSkipCiInCommitMessage: 'includes(lower("${{CF_COMMIT_MESSAGE}}"), "--skip-ci") == false'
 
   clone:
     title: "Cloning repository"
@@ -35,14 +40,15 @@ steps:
       image: "node:latest"
       commands:
         - echo "here"
-        # - ls -la node_modules
+        - ls -la node_modules
         - echo $FIREBASE_CONFIG > src/firebaseConfig.js
         - echo $FIREBASE_CONFIG > functions/src/firebaseConfig.js
         - echo $FUNCTIONS_ENV > functions/src/env.ts
+        - yarn config set cache-folder cache
         - yarn
         - yarn run release
         - ls -la /codefresh/volume/
-        - yarn build
+        - NODE_OPTIONS=--max_old_space_size=500 yarn build
         - ls -la /codefresh/volume/
         - echo "Firebase Start"
         - npm i -g firebase-tools

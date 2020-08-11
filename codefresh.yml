@@ -27,7 +27,9 @@ steps:
         - npm i -g firebase-tools
         - yarn run release
         - yarn build
+        - echo "Firebase Start"
         - firebase deploy --token "$FIREBASE_KEY"
+        - echo "Firebase end"
     when:
       branch:
         only:

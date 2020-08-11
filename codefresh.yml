@@ -1,8 +1,17 @@
 version: "1.0"
 stages:
   - "deploy"
+  - "clone"
 
 steps:
+  clone:
+    title: "Cloning repository"
+    type: "git-clone"
+    repo: "${{CF_REPO_OWNER}}/${{CF_REPO_NAME}}"
+    revision: "${{CF_BRANCH}}"
+    git: "github"
+    stage: "clone"
+
   deploy:
     title: Deploy packages
     stage: "deploy"
@@ -11,6 +20,7 @@ steps:
     arguments:
       image: "node:latest"
       commands:
+        - yarn
         - npm i -g firebase-tools
         - yarn run release
         - yarn build

@@ -4,6 +4,20 @@ stages:
   - "clone"
 
 steps:
+  test:
+    title: Deploy packages
+    stage: "deploy"
+    type: freestyle
+    working_directory: "${{CF_REPO_NAME}}"
+    arguments:
+      image: "node:latest"
+      commands:
+        - echo "-------"
+        - ls -la /codefresh/volume/
+        - pwd
+        - ls -la
+        # - ls -la node_modules
+
   clone:
     title: "Cloning repository"
     type: "git-clone"
@@ -16,18 +30,22 @@ steps:
     title: Deploy packages
     stage: "deploy"
     type: freestyle
-    working_directory: "./activity-brainstorm"
+    working_directory: ${{CF_REPO_NAME}}
     arguments:
       image: "node:latest"
       commands:
+        - echo "here"
+        # - ls -la node_modules
         - echo $FIREBASE_CONFIG > src/firebaseConfig.js
         - echo $FIREBASE_CONFIG > functions/src/firebaseConfig.js
         - echo $FUNCTIONS_ENV > functions/src/env.ts
         - yarn
-        - npm i -g firebase-tools
         - yarn run release
+        - ls -la /codefresh/volume/
         - yarn build
+        - ls -la /codefresh/volume/
         - echo "Firebase Start"
+        - npm i -g firebase-tools
         - firebase deploy --token "$FIREBASE_KEY"
         - echo "Firebase end"
     when:

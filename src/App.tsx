@@ -10,6 +10,7 @@ import {
 import Home from './Home';
 import Admin from './Admin';
 import Map from './Map';
+import Events from './Events';
 
 function App() {
   return (
@@ -26,6 +27,9 @@ function App() {
             <li>
               <Link to="/map">Map</Link>
             </li>
+            <li>
+              <Link to="/events">Events</Link>
+            </li>
           </ul>
         </nav>
         <Switch>
@@ -37,6 +41,9 @@ function App() {
           </Route>
           <Route path="/map">
             <Map />
+          </Route>
+          <Route path="/events">
+            <Events />
           </Route>
         </Switch>
       </div>

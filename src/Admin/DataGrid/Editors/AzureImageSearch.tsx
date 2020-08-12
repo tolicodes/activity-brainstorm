@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import styled from 'styled-components';
-import { updateActivity } from '../../apiHelpers';
+import { updateActivity } from '../../../apiHelpers';
 import passThroughEditor from './PassThroughEditor'
 
 const ROW_HEIGHT = 100;

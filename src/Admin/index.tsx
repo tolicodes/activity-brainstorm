@@ -2,11 +2,21 @@
 import React from 'react';
 
 import DataGrid from './DataGrid';
-import ActivityImport from './ActivityImport';
+import Import from './Import';
+
+import {
+  EVENT, ACTIVITIES,
+} from '../entities';
+
+const currentEntity = EVENT;
 
 export default () => (
   <div>
-    <ActivityImport />
-    <DataGrid />
+    <Import
+      entity={currentEntity}
+    />
+    <DataGrid
+      entity={currentEntity}
+    />
   </div>
 )

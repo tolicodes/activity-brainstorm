@@ -5,7 +5,6 @@ import PlacesAutocomplete, {
 } from 'react-places-autocomplete';
 import loadMapsApi from "load-google-maps-api";
 
-import { updateActivity } from '../../apiHelpers'
 import passThroughEditor from './PassThroughEditor'
 
 loadMapsApi({
@@ -18,7 +17,7 @@ interface IState {
   latLng?: google.maps.LatLngLiteral
 }
 
-const Formatter = ({ row, column: { key }, isEditor }: any) => {
+const Formatter = ({ row, column: { key }, isEditor, updateEntity }: any) => {
   const [value, setValue] = useState<IState>(row[key] || {
     address: '',
     latLng: undefined
@@ -40,7 +39,7 @@ const Formatter = ({ row, column: { key }, isEditor }: any) => {
       latLng
     });
 
-    updateActivity(row.doc, {
+    updateEntity(row.doc, {
       [key]: {
         address,
         latLng
@@ -69,7 +68,7 @@ const Formatter = ({ row, column: { key }, isEditor }: any) => {
         inputRef.current.dispatchEvent(ev2);
       }
     }, 200)
-  }, []);
+  });
 
   if (!row.id) return null;
 

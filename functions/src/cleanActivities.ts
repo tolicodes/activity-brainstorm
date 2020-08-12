@@ -16,8 +16,6 @@ export default functions.https.onRequest((req, res) => cors()(req, res, async ()
     const { thumbnailUrl, imageUrl, created, lastUpdated, name } = doc.data();
 
     await activities.doc(doc.id).set({ thumbnailUrl, imageUrl, created: created || new Date(), lastUpdated: lastUpdated || new Date(), name });
-
-    console.log(`Updated ${name}`);
   }
 
   res.json({

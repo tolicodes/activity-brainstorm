@@ -18,7 +18,7 @@ steps:
         - pwd
         - ls -la
         # - ls -la node_modules
-        - echo 1 && [[ $($CF_COMMIT_MESSAGE | grep "skip-ci") ]] && exit 1
+        - echo 1 && [[ $($CF_COMMIT_MESSAGE == *"skip-ci"*) ]] && exit 1
     when:
       condition:
         all:

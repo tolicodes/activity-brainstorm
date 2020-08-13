@@ -6,6 +6,7 @@ import Checkbox from './Admin/DataGrid/Editors/Checkbox';
 import GooglePlacesAutocomplete, { Editor as GooglePlacesAutocompleteEditor } from './Admin/DataGrid/Editors/GooglePlacesAutocomplete';
 
 import { getCollection, createEntity, updateEntity, deleteEntity } from './apiHelpers'
+import debug from './helpers/debug';
 
 const standardFns = {
   updateFn: updateEntity,
@@ -36,7 +37,7 @@ export const EVENT = {
     { key: 'remote', name: 'Online Event', editable: true, formatter: Checkbox, editor: Checkbox },
     // { key: 'timeStart', name: 'Time Start', editable: true },
     // { key: 'timeEnd', name: 'Time End', editable: true },
-    { key: 'repeats', name: 'Repeats', editable: true, formatter: Checkbox, editor: Checkbox },
+    { key: 'recurrence', name: 'Repeats', editable: true, formatter: Checkbox, editor: Checkbox },
     { key: 'recurrenceInterval', name: 'Repeats When?', editable: true },
     { key: 'url', name: 'URL', editable: true },
     { key: 'zoomUrl', name: 'Zoom URL', editable: true },
@@ -44,20 +45,27 @@ export const EVENT = {
     { key: 'cost', name: 'Cost', editable: true },
     { key: 'detailsHtml', name: 'Details', editable: true },
   ],
-  importTransform: (row: any) => ({
-    title: row[0],
-    activity: 'Improv',
-    remote: row[2] === 'TRUE',
-    timeStart: moment(row[3]).toDate(),
-    timeEnd: moment(row[4]).toDate(),
-    recurrence: row[5] === 'TRUE',
-    recurrenceInterval: row[6],
-    url: row[7],
-    zoomUrl: row[8],
-    host: row[9],
-    cost: row[10],
-    detailsHtml: row[11],
-  })
+  importTransform: (row: any) => {
+    debug('entities/event/importTransform', 'pre-transform', row);
+
+    const transformed = {
+      title: row[0],
+      activity: 'Improv',
+      remote: row[2] === 'TRUE',
+      timeStart: moment(row[4]).toDate(),
+      timeEnd: row[5] ? moment(row[5]).toDate() : null,
+      recurrence: row[6] === 'TRUE',
+      recurrenceInterval: row[7],
+      url: row[8],
+      zoomUrl: row[9],
+      host: row[10],
+      cost: row[11] === 'FREE' ? 0 : Number(row[11].replace(/[^\d.]/, '')),
+      detailsHtml: row[12],
+    };
+
+    debug('entities/event/importTransform', 'transformed', transformed);
+    return transformed;
+  }
 }
 
 export const ACTIVITIES = {

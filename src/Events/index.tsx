@@ -11,22 +11,27 @@ import getThumbnailGridSize from '../helpers/getThumbnailGridSize';
 
 import moment from 'moment';
 
-const LinkWrapper = styled(Link)`
+const LinkWrapper = styled('a')`
   height: 100%;
-  width: 100%;
 
   color: white;
+  text-decoration: none;
   font-weight: 400;
   font-size: 0.875rem;
 `;
 
-const BottomBar = styled('div')`
+const BottomBarWrapper = styled('div')`
+  display: flex;
+  width: 100%;
+
   position: absolute;
   bottom: 0;
-  
-  background: rgba(0, 0, 0, 0.5);
+`;
 
-  width: 100%;
+const BottomBar = styled('div')`
+  background: rgba(0, 0, 0, 0.5);
+  flex: 1;
+
   padding: 16px;
 
   line-height: 150%;
@@ -38,7 +43,7 @@ const Date = styled('div')`
   font-weight: bold;
 `
 
-const Name = styled('div')`
+const Title = styled('div')`
   flex: 1;
   font-weight: bold;
 `;
@@ -90,22 +95,24 @@ export default () => {
   return (<GridList cellHeight={cellHeight} cols={cols}>
     {
       events.docs.map(doc => {
-        const { id, name, remote, host, timeStart, timeEnd, repeats, dayOfWeek, url, zoom, provider, cost, notes, thumbnailUrl } = doc.data();
+        const { id, title, remote, host, timeStart, timeEnd, repeats, dayOfWeek, url, zoom, provider, cost, notes, thumbnailUrl } = doc.data();
 
         const date = `${moment.unix(timeStart.seconds).format(DATE_FORMAT)} ${moment.unix(timeStart.seconds).format(TIME_FORMAT)}`
 
         return (
           <GridListTile key={id}>
-            <img src={THUMBNAIL_URL_TEMP} alt={name} />
+            <img src={THUMBNAIL_URL_TEMP} alt={title} />
 
-            <LinkWrapper to={url}>
+            <LinkWrapper href={url}>
               <OnlineEvent onlineEvent={remote}>Online Event</OnlineEvent>
               <Cost free={cost === 0}>{cost === 0 ? 'FREE' : `$${cost}`}</Cost>
-              <BottomBar>
-                <Date>{date}</Date>
-                <Name>{name}</Name>
-                <Host>{host}</Host>
-              </BottomBar>
+              <BottomBarWrapper>
+                <BottomBar>
+                  <Date>{date}</Date>
+                  <Title>{title}</Title>
+                  <Host>{host}</Host>
+                </BottomBar>
+              </BottomBarWrapper>
             </LinkWrapper>
           </GridListTile>
         )

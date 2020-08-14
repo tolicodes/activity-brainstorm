@@ -21,6 +21,8 @@ export default ({ entity }: any) => {
   const {
     collection,
     fields,
+    updateFn,
+    createFn,
   } = entity;
 
   // sort entities
@@ -53,7 +55,13 @@ export default ({ entity }: any) => {
           headerRowHeight={HEADER_ROW_HEIGHT}
           rowHeight={ROW_HEIGHT}
 
-          onRowsUpdate={onRowsUpdate}
+          onRowsUpdate={(props: any) => onRowsUpdate({
+            ...props,
+            rows,
+            updateFn,
+            createFn,
+            fields,
+          })}
 
           enableCellSelect={true}
 

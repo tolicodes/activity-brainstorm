@@ -32,8 +32,8 @@ export const EVENT = {
   collection: eventCollection,
   createFn: (entity: any) => createEntity(eventCollection, entity),
   fields: [
-    { key: 'title', name: 'Title', editable: true, formatter: NameFormatter },
-    { key: 'activity', name: 'Activity', editable: true },
+    { key: 'title', name: 'Title', editable: true, formatter: NameFormatter, required: true },
+    { key: 'activity', name: 'Activity', editable: true, required: true },
     { key: 'remote', name: 'Online Event', editable: true, formatter: Checkbox, editor: Checkbox },
     // { key: 'timeStart', name: 'Time Start', editable: true },
     // { key: 'timeEnd', name: 'Time End', editable: true },

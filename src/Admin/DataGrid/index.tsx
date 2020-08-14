@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { createGlobalStyle } from 'styled-components';
 import 'react-data-grid/dist/react-data-grid.css';
 import ReactDataGrid from 'react-data-grid';
@@ -25,11 +25,11 @@ export default ({ entity }: any) => {
     createFn,
   } = entity;
 
-  // sort entities
-  const entityRows = useSortEntities(collection);
-
   // pass fields like collection, createFn, updateFn, and fields to the editors
   usePassThroughPropsToEditors(fields, entity);
+
+  // sort entities
+  const entityRows = useSortEntities(collection, entity);
 
   if (!entityRows.length) return null;
 
@@ -39,14 +39,13 @@ export default ({ entity }: any) => {
     ...entityRows
   ];
 
-
   return (
     <div>
       {/* for height: 100vh */}
       <StyledGrid />
 
       {
-        entityRows && <ReactDataGrid
+        rows && <ReactDataGrid
           // @ts-ignore
           columns={fields}
           // @ts-ignore

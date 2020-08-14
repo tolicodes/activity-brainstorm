@@ -15,6 +15,7 @@ const EventCardWrapper = styled('div')`
 
 const OuterWrap = styled('div')`
   .react-tooltip {
+    opacity: 1;
     z-index: 10000;
   }
 `;
@@ -31,11 +32,11 @@ const TooltipWrapper = styled('div')`
 export default ({ event }: any) => {
   const calendarItemId = event.id;
   const eventTooltipId = `event-tooltip-${calendarItemId}`;
-  console.log(calendarItemId);
 
   return (
     <OuterWrap>
       <span
+        onClick={() => { window.location.href = event.doc.data().url }}
         data-for={eventTooltipId}
         data-tip={calendarItemId}
       >

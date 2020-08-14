@@ -1,13 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useCollection } from 'react-firebase-hooks/firestore';
 
-export default (collection: any) => {
-  const [entities] = useCollection(collection);
+export default (collection: any, entityDefinition: any) => {
+  const [entities, loading] = useCollection(collection);
   const [positions, setPositions] = useState({});
   const [entityRows, setEntityRows] = useState([]);
 
   useEffect(() => {
-    if (!entities) return;
+    if (!entities || !collection) {
+      setEntityRows([]);
+      return;
+    }
 
     const entityRows = entities.docs.map(doc => ({
       ...doc.data(),
@@ -34,11 +37,12 @@ export default (collection: any) => {
     });
 
     setPositions(positions);
-    // @ts-ignore;
 
+    // @ts-ignore;
     setEntityRows(entityRows);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [entities]);
+  }, [entities, entityDefinition, collection]);
+
+  if (loading) return [];
 
   return entityRows;
 }

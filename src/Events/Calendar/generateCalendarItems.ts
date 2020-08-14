@@ -59,9 +59,6 @@ export default (events: any) => {
         end: moment(endDates[i].toUTCString()).toDate()
       });
     });
-
-    // @ts-ignore
-    console.log(calendarItems)
   });
 
   // @ts-ignore

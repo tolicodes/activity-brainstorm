@@ -1,16 +1,20 @@
 import React from 'react';
 import Checkbox from '@material-ui/core/Checkbox';
 
-export default ({ row, column: { key }, updateFn }: any) => {
-  const checked = row[key];
+import updateValue from './updateValue';
+import getValue from './getValue';
 
-  const onChange = () => {
-    updateFn(row.doc, {
-      [key]: !checked
-    });
+export default (props: any) => {
+  const checked = getValue(props, false);
+
+  console.log(checked);
+
+  const onChange = async (event: any) => {
+    console.log(event.target.checked)
+    updateValue(props, event.target.checked)
   }
 
   return (
-    row.id ? <Checkbox onChange={onChange} checked={checked} /> : null
+    <Checkbox onChange={onChange} checked={checked} />
   );
 }

@@ -18,7 +18,7 @@ export default ({
   entity: {
     createFn: (entity: any) => any;
     fields: any,
-    importTransform: any
+    importTransform?: any
   }
 }) => {
   const fieldKeys = fields.map(({ key }: any) => key);

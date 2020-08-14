@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PlacesAutocomplete, {
   geocodeByAddress,
   getLatLng,
 } from 'react-places-autocomplete';
 import loadMapsApi from "load-google-maps-api";
 
+import getValue from './getValue';
+import updateValue from './updateValue';
 import passThroughEditor from './PassThroughEditor'
 
 loadMapsApi({
@@ -17,11 +19,13 @@ interface IState {
   latLng?: google.maps.LatLngLiteral
 }
 
-const Formatter = ({ row, column: { key }, isEditor, updateEntity }: any) => {
-  const [value, setValue] = useState<IState>(row[key] || {
+const Formatter = (props: any) => {
+  const initialValue = getValue(props, {
     address: '',
     latLng: undefined
   });
+
+  const [value, setValue] = useState<IState>(initialValue);
 
   const handleChange = (address: string) => {
     setValue({
@@ -39,38 +43,47 @@ const Formatter = ({ row, column: { key }, isEditor, updateEntity }: any) => {
       latLng
     });
 
-    updateEntity(row.doc, {
-      [key]: {
-        address,
-        latLng
-      }
-    });
+    updateValue(props, {
+      address,
+      latLng
+    })
   }
 
-  const inputRef = React.createRef();
+  const [prefilled, setPrefilled] = useState(false);
+
+  const prefillLocation = () => {
+    if (prefilled || value.address.trim()) return;
+
+    setValue({
+      address: props.row[props.editorProps.prefillValueKey],
+      latLng: undefined
+    });
+
+    setPrefilled(true);
+  }
+
+  const inputRef = useRef(null);
 
   useEffect(() => {
+    if (!prefilled) return;
+
     // @ts-ignore
     setTimeout(() => {
-      if (isEditor && inputRef.current) {
+      if (!inputRef.current) return;
+      // @ts-ignore
+      inputRef.current.focus();
 
-        // @ts-ignore
-        inputRef.current.focus();
+      // @ts-ignore
+      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+      // needs the space or it doesn't see the change
+      // @ts-ignore
+      nativeInputValueSetter.call(inputRef.current, value.address + ' ');
 
-        // @ts-ignore
-        const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-        // needs the space or it doesn't see the change
-        // @ts-ignore
-        nativeInputValueSetter.call(inputRef.current, value.address + ' ');
-
-        const ev2 = new Event('input', { bubbles: true });
-        // @ts-ignore
-        inputRef.current.dispatchEvent(ev2);
-      }
-    }, 200)
-  });
-
-  if (!row.id) return null;
+      const ev2 = new Event('input', { bubbles: true });
+      // @ts-ignore
+      inputRef.current.dispatchEvent(ev2);
+    }, 500)
+  }, [prefilled, value.address]);
 
   return (
     <PlacesAutocomplete
@@ -83,6 +96,7 @@ const Formatter = ({ row, column: { key }, isEditor, updateEntity }: any) => {
           <input
             // @ts-ignore
             ref={inputRef}
+            onFocus={prefillLocation}
             {...getInputProps({
               placeholder: 'Search Places ...',
               className: 'location-search-input',
@@ -118,19 +132,11 @@ const Formatter = ({ row, column: { key }, isEditor, updateEntity }: any) => {
 
 export default Formatter;
 
-export const Editor = passThroughEditor(Formatter, ({
-  column,
-  row,
-  onCommit
-}: any) => {
-  const withLocationPrefilled = {
-    ...row,
-    location: row.location || {
-      address: row.name
-    },
-  };
-
+export const Editor = passThroughEditor(Formatter, (props: any) => {
   return (
-    <Formatter row={withLocationPrefilled} column={column} onCommit={onCommit} isEditor={true} />
+    <Formatter
+      {...props}
+      isEditor={true}
+    />
   );
 })

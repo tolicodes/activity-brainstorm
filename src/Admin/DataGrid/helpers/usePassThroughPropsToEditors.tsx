@@ -3,21 +3,29 @@ import { useEffect } from 'react';
 
 export default (fields: any, props: any) => {
   useEffect(() => {
-    const passThroughProps = (Editor: any) => (properties: any) => (
-      <Editor
-        {...properties}
-        {...props}
-      />
-    );
+    if (!fields || !props) return;
+
+    const passThroughProps = (Editor: any, editorProps: any) => (properties: any) => {
+      if (!(properties.row?.id)) return null;
+
+      return (
+        <Editor
+          {...properties}
+          {...props}
+          editorProps={editorProps}
+        />
+      );
+    };
 
     fields.forEach((field: any) => {
       const {
         editor,
         formatter,
+        editorProps,
       } = field;
 
-      field.editor = editor && passThroughProps(editor);
-      field.formatter = formatter && passThroughProps(formatter);
+      field.editor = editor && passThroughProps(editor, editorProps);
+      field.formatter = formatter && passThroughProps(formatter, editorProps);
     });
-  })
+  }, [fields, props])
 }

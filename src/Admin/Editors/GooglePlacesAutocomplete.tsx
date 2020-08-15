@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+
 import PlacesAutocomplete, {
   geocodeByAddress,
   getLatLng,
@@ -6,8 +7,6 @@ import PlacesAutocomplete, {
 import loadMapsApi from "load-google-maps-api";
 
 import getValue from './getValue';
-import updateValue from './updateValue';
-import passThroughEditor from './PassThroughEditor'
 
 loadMapsApi({
   key: process.env.REACT_APP_GOOGLE_MAPS_KEY,
@@ -19,14 +18,15 @@ interface IState {
   latLng?: google.maps.LatLngLiteral
 }
 
-const Formatter = (props: any) => {
-  const initialValue = getValue(props, {
+const Editor = (props: any) => {
+  const modelValue = getValue(props, {
     address: '',
     latLng: undefined
   });
 
-  const [value, setValue] = useState<IState>(initialValue);
+  const [value, setValue] = useState<IState>(modelValue);
 
+  // typing in
   const handleChange = (address: string) => {
     setValue({
       address,
@@ -34,38 +34,34 @@ const Formatter = (props: any) => {
     });
   }
 
+  // selecting an option
   const handleSelect = async (address: string) => {
     const geo = await geocodeByAddress(address);
     const latLng = await getLatLng(geo[0]);
 
-    setValue({
+    const update = {
       address,
       latLng
-    });
+    };
 
-    updateValue(props, {
-      address,
-      latLng
-    })
+    setValue(update)
+
+    props.doCommit(update);
   }
 
   const [prefilled, setPrefilled] = useState(false);
 
-  const prefillLocation = () => {
-    if (prefilled || value.address.trim()) return;
+  useEffect(() => {
+    if (value.address && !prefilled) return;
 
-    setValue({
-      address: props.row[props.editorProps.prefillValueKey],
-      latLng: undefined
-    });
+    const nameValue = props.row[props.editorProps.prefillValueKey];
 
     setPrefilled(true);
-  }
 
-  const inputRef = useRef(null);
-
-  useEffect(() => {
-    if (!prefilled) return;
+    setValue({
+      address: nameValue,
+      latLng: undefined
+    });
 
     // @ts-ignore
     setTimeout(() => {
@@ -77,13 +73,15 @@ const Formatter = (props: any) => {
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
       // needs the space or it doesn't see the change
       // @ts-ignore
-      nativeInputValueSetter.call(inputRef.current, value.address + ' ');
+      nativeInputValueSetter.call(inputRef.current, nameValue + ' ');
 
       const ev2 = new Event('input', { bubbles: true });
       // @ts-ignore
       inputRef.current.dispatchEvent(ev2);
     }, 500)
-  }, [prefilled, value.address]);
+  }, [prefilled]);
+
+  const inputRef = useRef(null);
 
   return (
     <PlacesAutocomplete
@@ -96,7 +94,6 @@ const Formatter = (props: any) => {
           <input
             // @ts-ignore
             ref={inputRef}
-            onFocus={prefillLocation}
             {...getInputProps({
               placeholder: 'Search Places ...',
               className: 'location-search-input',
@@ -130,13 +127,17 @@ const Formatter = (props: any) => {
   );
 }
 
-export default Formatter;
+const Formatter = (props: any) => {
+  const { address } = getValue(props, {});
 
-export const Editor = passThroughEditor(Formatter, (props: any) => {
   return (
-    <Formatter
-      {...props}
-      isEditor={true}
-    />
+    <div>{address}</div>
   );
-})
+}
+
+export default {
+  formatter: Formatter,
+  editor: Editor,
+  editable: true
+};
+

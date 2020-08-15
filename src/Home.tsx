@@ -7,11 +7,11 @@ import GridListTileBar from '@material-ui/core/GridListTileBar';
 import IconButton from '@material-ui/core/IconButton';
 import InfoIcon from '@material-ui/icons/Info';
 
-import { activitiesCollection } from './apiHelpers';
+import ACTIVITY from './entities/activities';
 import getThumbnailGridSize from './helpers/getThumbnailGridSize';
 
 export default () => {
-  const [activities] = useCollection(activitiesCollection);
+  const [activities] = useCollection(ACTIVITY.collection);
 
   const { cellHeight, cols } = getThumbnailGridSize();
 

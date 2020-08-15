@@ -1,10 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useRef } from 'react';
 import { createGlobalStyle } from 'styled-components';
 import 'react-data-grid/dist/react-data-grid.css';
 import ReactDataGrid from 'react-data-grid';
 
 import onRowsUpdate from './dbConnectors/firebase/onRowsUpdate';
-import onCellExpand from './helpers/onCellExpand';
 import useSortEntities from './helpers/useSortEntities';
 import usePassThroughPropsToEditors from './helpers/usePassThroughPropsToEditors';
 
@@ -18,6 +17,8 @@ const StyledGrid = createGlobalStyle`
 `;
 
 export default ({ entity }: any) => {
+  const dataGridRef = useRef(null);
+
   const {
     collection,
     fields,
@@ -26,12 +27,26 @@ export default ({ entity }: any) => {
   } = entity;
 
   // pass fields like collection, createFn, updateFn, and fields to the editors
-  usePassThroughPropsToEditors(fields, entity);
+  const fieldsWithProps = usePassThroughPropsToEditors(fields, {
+    entity,
+    // list of fields
+    fields,
+
+    // db functions
+    updateFn,
+    createFn,
+
+    // @ts-ignore
+    selectCell: (...props) => {
+      // @ts-ignore
+      dataGridRef.current.selectCell(...props)
+    }
+  });
 
   // sort entities
   const entityRows = useSortEntities(collection, entity);
 
-  if (!entityRows.length) return null;
+  if (!fieldsWithProps || !collection) return null
 
   // add blank row on top (new entry)
   const rows = [
@@ -47,7 +62,9 @@ export default ({ entity }: any) => {
       {
         rows && <ReactDataGrid
           // @ts-ignore
-          columns={fields}
+          ref={dataGridRef}
+          // @ts-ignore
+          columns={fieldsWithProps}
           // @ts-ignore
           rows={rows}
 
@@ -62,11 +79,10 @@ export default ({ entity }: any) => {
             fields,
           })}
 
-          enableCellSelect={true}
-
-        // Cell Expand
-        // toolbar={<Toolbar enableFilter={true} />
-        // getSubRowDetails={}
+          onRowClick={(rowIdx: number, row: any, column: any) => {
+            // @ts-ignore
+            dataGridRef.current?.selectCell({ rowIdx, idx: column.idx }, true);
+          }}
         />
       }
     </div>

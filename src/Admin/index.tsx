@@ -6,14 +6,10 @@ import ButtonGroup from '@material-ui/core/ButtonGroup';
 import DataGrid from './DataGrid';
 import Import from './Import';
 
-import {
-  EVENT, ACTIVITIES,
-} from '../entities';
-
-const ENTITIES = [EVENT, ACTIVITIES];
+import ENTITIES from '../entities'
 
 export default () => {
-  const [currentEntity, setCurrentEntity] = useState(ACTIVITIES);
+  const [currentEntity, setCurrentEntity] = useState(ENTITIES[0]);
   return (
     <div>
       <div>

@@ -1,4 +1,9 @@
-export default ({
+import debugCreator from '../../../../helpers/debug';
+import updateValue from '../../../Editors/updateValue';
+
+const debug = debugCreator('onRowsUpdate');
+
+export default async ({
   fromRow,
   toRow,
   updated,
@@ -16,17 +21,31 @@ export default ({
   updateFn: any,
   rows: any
 }) => {
+  if (!updated) return;
+
+  const {
+    options,
+    ...updatedVal
+  } = updated;
+
+  if (options?.saveValue === false) return;
+
+  debug(`Updating row ${fromRow} to ${toRow} with value`, updated);
+
   if (fromRow === 0) {
     // blank row
     // we want to check if the first field is updated
-    if (!updated[fields[0].key]) return;
+    if (!updatedVal[fields[0].key]) return false;
 
-    createFn(updated);
+    createFn(updatedVal);
     return;
   }
 
   for (let i = fromRow; i <= toRow; i++) {
-    // @ts-ignore
-    updateFn(rows[i].doc, updated);
+    updateValue({
+      row: rows[i],
+      updated,
+      updateFn,
+    })
   }
 };

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
 
-import debug from '../../helpers/debug';
+import debugCreator from '../../helpers/debug';
+
+const debug = debugCreator('admin/import')
 
 const Textarea = styled('textarea')`
   width: 100%;
@@ -24,12 +26,12 @@ export default ({
   const fieldKeys = fields.map(({ key }: any) => key);
   const [importText, setImportText] = useState('');
 
-  debug('admin/import', 'importText', importText);
+  debug('importText', importText);
   const importEntities = () => {
     importText.split('\n').forEach(entity => {
-      debug('admin/import', 'Entity String', entity);
+      debug('Entity String', entity);
       const entityValues = entity.split('\t');
-      debug('admin/import', 'Entity Values Array', entityValues)
+      debug('Entity Values Array', entityValues)
 
       const entityObj = importTransform ?
         importTransform(entityValues) :

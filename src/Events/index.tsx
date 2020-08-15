@@ -1,13 +1,12 @@
 import React from 'react';
-import styled from 'styled-components';
 import { useCollection } from 'react-firebase-hooks/firestore';
 
 import Calendar from './Calendar';
 import Grid from './Grid';
-import { eventsCollection } from '../apiHelpers';
+import EVENT from '../entities/events';
 
 export default () => {
-  const [events] = useCollection(eventsCollection);
+  const [events] = useCollection(EVENT.collection);
 
   if (!events) return null;
 

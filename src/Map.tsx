@@ -4,7 +4,7 @@ import { useCollection } from 'react-firebase-hooks/firestore';
 import LocationOnIcon from '@material-ui/icons/LocationOn'
 import styled from 'styled-components';
 
-import { activitiesCollection } from './apiHelpers';
+import ACTIVITY from './entities/activities';
 
 const DEFAULT_ZOOM = 7;
 
@@ -57,9 +57,7 @@ export default () => {
     });
   });
 
-  const [activities] = useCollection(
-    activitiesCollection
-  );
+  const [activities] = useCollection(ACTIVITY.collection);
 
   if (!activities) return null;
 
